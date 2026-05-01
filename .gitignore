@@ -4,5 +4,3 @@ __pycache__/
 .DS_Store
 .mplcache/
 
-# Keep experiment artifacts, metrics, figures, checkpoints, and raw data in this repo
-# because the course submission asks for reproducibility.
