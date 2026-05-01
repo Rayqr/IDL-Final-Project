@@ -94,3 +94,41 @@ class TCNRegressor(nn.Module):
         x = x.transpose(1, 2)
         out = self.tcn(x)
         return self.head(out[:, :, -1])
+
+
+class MovingAverage(nn.Module):
+    def __init__(self, kernel_size: int):
+        super().__init__()
+        self.kernel_size = kernel_size
+        self.avg = nn.AvgPool1d(kernel_size=kernel_size, stride=1, padding=0)
+
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
+        pad_left = (self.kernel_size - 1) // 2
+        pad_right = self.kernel_size - 1 - pad_left
+        front = x[:, :1, :].repeat(1, pad_left, 1)
+        end = x[:, -1:, :].repeat(1, pad_right, 1)
+        x_padded = torch.cat([front, x, end], dim=1)
+        return self.avg(x_padded.transpose(1, 2)).transpose(1, 2)
+
+
+class DLinearRegressor(nn.Module):
+    """DLinear-style decomposition model adapted for sequence-to-one RUL regression."""
+
+    def __init__(self, input_dim: int, window_size: int, moving_avg: int = 7):
+        super().__init__()
+        self.decomposition = MovingAverage(kernel_size=moving_avg)
+        self.seasonal_linear = nn.Linear(window_size, 1)
+        self.trend_linear = nn.Linear(window_size, 1)
+        self.head = nn.Sequential(
+            nn.LayerNorm(input_dim),
+            nn.Linear(input_dim, 32),
+            nn.ReLU(),
+            nn.Linear(32, 1),
+        )
+
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
+        trend = self.decomposition(x)
+        seasonal = x - trend
+        seasonal_out = self.seasonal_linear(seasonal.transpose(1, 2)).squeeze(-1)
+        trend_out = self.trend_linear(trend.transpose(1, 2)).squeeze(-1)
+        return self.head(seasonal_out + trend_out)

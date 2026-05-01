@@ -16,7 +16,7 @@ from torch import nn
 from torch.utils.data import DataLoader
 
 from data import load_fd001
-from models import LSTMRegressor, TCNRegressor
+from models import DLinearRegressor, LSTMRegressor, TCNRegressor
 
 
 def set_seed(seed: int) -> None:
@@ -77,11 +77,13 @@ def evaluate(model, loader, criterion, device) -> tuple[float, np.ndarray, np.nd
     return float(np.mean(losses)), y_true, y_pred
 
 
-def build_model(name: str, input_dim: int) -> nn.Module:
+def build_model(name: str, input_dim: int, window_size: int) -> nn.Module:
     if name == "lstm":
         return LSTMRegressor(input_dim=input_dim, hidden_dim=64, num_layers=1)
     if name == "tcn":
         return TCNRegressor(input_dim=input_dim, channels=(32, 32, 64), kernel_size=3, dropout=0.1)
+    if name == "dlinear":
+        return DLinearRegressor(input_dim=input_dim, window_size=window_size, moving_avg=7)
     raise ValueError(f"Unknown model: {name}")
 
 
@@ -119,7 +121,7 @@ def train_one_model(name: str, datasets, args, device: torch.device):
     val_loader = DataLoader(datasets.val_dataset, batch_size=args.batch_size, shuffle=False)
     test_loader = DataLoader(datasets.test_dataset, batch_size=args.batch_size, shuffle=False)
 
-    model = build_model(name, datasets.feature_dim).to(device)
+    model = build_model(name, datasets.feature_dim, args.window_size).to(device)
     optimizer = torch.optim.Adam(model.parameters(), lr=args.lr, weight_decay=args.weight_decay)
     criterion = nn.MSELoss()
 
@@ -163,7 +165,7 @@ def train_one_model(name: str, datasets, args, device: torch.device):
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description="Train LSTM baseline and TCN variant on NASA C-MAPSS FD001.")
+    parser = argparse.ArgumentParser(description="Train LSTM baseline and variants on NASA C-MAPSS FD001.")
     parser.add_argument("--data-dir", type=Path, default=Path("data/raw"))
     parser.add_argument("--output-dir", type=Path, default=Path("outputs"))
     parser.add_argument("--epochs", type=int, default=20)
@@ -172,6 +174,13 @@ def main() -> None:
     parser.add_argument("--lr", type=float, default=1e-3)
     parser.add_argument("--weight-decay", type=float, default=1e-5)
     parser.add_argument("--seed", type=int, default=7)
+    parser.add_argument(
+        "--models",
+        nargs="+",
+        default=["lstm", "tcn", "dlinear"],
+        choices=["lstm", "tcn", "dlinear"],
+        help="Models to train. Default trains the baseline plus two variants.",
+    )
     args = parser.parse_args()
 
     set_seed(args.seed)
@@ -185,7 +194,7 @@ def main() -> None:
 
     histories = {}
     metrics = []
-    for name in ["lstm", "tcn"]:
+    for name in args.models:
         history, model_metrics = train_one_model(name, datasets, args, device)
         histories[name] = history
         metrics.append(model_metrics)

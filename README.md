@@ -5,7 +5,8 @@ This is a small 24-788 mini-project experiment for one student:
 - Dataset: NASA C-MAPSS FD001 turbofan degradation data
 - Task: predict remaining useful life (RUL) from multivariate sensor time series
 - Baseline: LSTM
-- Variant: Temporal Convolutional Network (TCN)
+- Variant 1: Temporal Convolutional Network (TCN)
+- Variant 2: DLinear-style decomposed linear time-series model
 - Metrics: RMSE and PHM asymmetric score
 
 The official NASA page describes C-MAPSS as multivariate engine time series with train/test splits and true RUL labels for the test set. FD001 has 100 train trajectories, 100 test trajectories, one operating condition, and one fault mode.
@@ -17,7 +18,7 @@ cmapss_rul_project/
   data/raw/                 # CMAPSSData.zip and extracted FD001 files
   scripts/download_data.py  # optional data downloader
   src/data.py               # parsing, scaling, windowing
-  src/models.py             # LSTM and TCN models
+  src/models.py             # LSTM, TCN, and DLinear-style models
   src/train.py              # training, evaluation, plots, checkpoints
   outputs/                  # generated metrics, figures, checkpoints
   requirements.txt
@@ -64,6 +65,14 @@ Use 20-50 epochs for report-quality curves:
 python src/train.py --epochs 30 --window-size 30 --batch-size 128
 ```
 
+By default this trains the solo extra-credit scope: one baseline plus two model variants.
+You can also train a subset while debugging:
+
+```bash
+python src/train.py --epochs 3 --models dlinear
+python src/train.py --epochs 3 --models lstm tcn
+```
+
 Generated outputs:
 
 ```text
@@ -72,15 +81,17 @@ outputs/metrics.json
 outputs/figures/loss_curves.png
 outputs/figures/lstm_test_predictions.png
 outputs/figures/tcn_test_predictions.png
+outputs/figures/dlinear_test_predictions.png
 outputs/checkpoints/lstm_best.pt
 outputs/checkpoints/tcn_best.pt
+outputs/checkpoints/dlinear_best.pt
 ```
 
 Use `outputs/metrics.csv` for the main results table and `outputs/figures/loss_curves.png` as the required training curve figure.
 
 ## Suggested Report Claim
 
-The LSTM baseline models temporal degradation recursively through hidden states, while the TCN variant uses dilated causal convolutions to capture temporal context with more parallel computation. The experiment tests whether convolutional temporal modeling can match or improve RUL prediction on FD001 while training efficiently.
+The LSTM baseline models temporal degradation recursively through hidden states. The TCN variant uses dilated causal convolutions to capture temporal context with more parallel computation. The DLinear-style variant decomposes the sensor window into trend and residual components, then uses simple linear projections before a small regression head. The experiment tests whether convolutional temporal modeling or decomposition-based linear modeling can match or improve RUL prediction on FD001 while training efficiently.
 
 ## Citation Notes
 
@@ -91,3 +102,7 @@ Saxena, A., Goebel, K., Simon, D., and Eklund, N. "Damage Propagation Modeling f
 For the TCN variant, cite:
 
 Bai, S., Kolter, J. Z., and Koltun, V. "An Empirical Evaluation of Generic Convolutional and Recurrent Networks for Sequence Modeling." 2018.
+
+For the DLinear-style variant, cite:
+
+Zeng, A., Chen, M., Zhang, L., and Xu, Q. "Are Transformers Effective for Time Series Forecasting?" Proceedings of the AAAI Conference on Artificial Intelligence, 2023.
