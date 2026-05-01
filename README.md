@@ -1,91 +1,82 @@
-# NASA C-MAPSS FD001 RUL Prediction
+# IDL Final Project: C-MAPSS RUL Prediction
 
-This is a small 24-788 mini-project experiment for one student:
+This repo is for my 24-788 Introduction to Deep Learning mini-project. I use the NASA C-MAPSS turbofan engine degradation dataset, starting with FD001 as suggested in the project handout.
 
-- Dataset: NASA C-MAPSS FD001 turbofan degradation data
-- Task: predict remaining useful life (RUL) from multivariate sensor time series
-- Baseline: LSTM
-- Variant 1: Temporal Convolutional Network (TCN)
-- Variant 2: DLinear-style decomposed linear time-series model
-- Metrics: RMSE and PHM asymmetric score
-- Extra analysis: parameter count, training time, model comparison plot, and sensor occlusion importance
+The task is to predict remaining useful life (RUL) from a window of engine sensor readings.
 
-The official NASA page describes C-MAPSS as multivariate engine time series with train/test splits and true RUL labels for the test set. FD001 has 100 train trajectories, 100 test trajectories, one operating condition, and one fault mode.
+## What I am comparing
 
-## Files
+| Role | Model | Reason |
+|---|---|---|
+| Baseline | LSTM | Natural sequence baseline for sensor time series |
+| Variant 1 | TCN | Uses dilated 1D convolutions instead of recurrence |
+| Variant 2 | DLinear-style model | Uses trend/residual decomposition with a small linear model |
+
+Main metric: RMSE on the FD001 test set. I also report the PHM asymmetric score, parameter count, and training time.
+
+I also included a simple sensor occlusion analysis to see which sensor channels matter most for the trained LSTM.
+
+## Repo layout
 
 ```text
-cmapss_rul_project/
-  data/raw/                 # CMAPSSData.zip and extracted FD001 files
-  scripts/download_data.py  # optional data downloader
-  src/data.py               # parsing, scaling, windowing
-  src/models.py             # LSTM, TCN, and DLinear-style models
-  src/train.py              # training, evaluation, plots, checkpoints
-  src/analyze_outputs.py    # extra analysis plots for the report
-  outputs/                  # generated metrics, figures, checkpoints
-  requirements.txt
+data/raw/                  # C-MAPSS data files
+src/data.py                # reading files, RUL labels, scaling, sliding windows
+src/models.py              # LSTM, TCN, DLinear-style models
+src/train.py               # training and evaluation
+src/analyze_outputs.py     # model comparison plot and feature occlusion analysis
+scripts/download_data.py   # downloads/unzips C-MAPSS if needed
+scripts/run_full_experiment.sh
+outputs/                   # metrics, figures, and checkpoints
+requirements.txt
 ```
 
-## Setup
-
-Create an environment and install dependencies:
+## Run on RunPod
 
 ```bash
-cd "/Users/raymondye/Documents/New project/cmapss_rul_project"
+git clone https://github.com/Rayqr/IDL-Final-Project.git
+cd IDL-Final-Project
+
 python3 -m venv .venv
 source .venv/bin/activate
 pip install -r requirements.txt
+
+bash scripts/run_full_experiment.sh
 ```
 
-If the dataset files are missing, download them:
+The full script currently runs 30 epochs for all three models, then runs the extra analysis.
 
-```bash
-python scripts/download_data.py
-```
-
-The dataset has already been downloaded in this project folder:
-
-```text
-data/raw/train_FD001.txt
-data/raw/test_FD001.txt
-data/raw/RUL_FD001.txt
-```
-
-## Quick Smoke Run
-
-Use 3 epochs to verify the pipeline quickly:
+If I only want to test that the code works:
 
 ```bash
 python src/train.py --epochs 3
+python src/analyze_outputs.py --importance-model lstm
 ```
 
-## Report Run
+## Main commands
 
-Use 20-50 epochs for report-quality curves:
+Train all models:
 
 ```bash
 python src/train.py --epochs 30 --window-size 30 --batch-size 128
 ```
 
-By default this trains the solo extra-credit scope: one baseline plus two model variants.
-You can also train a subset while debugging:
+Train only one or two models while debugging:
 
 ```bash
 python src/train.py --epochs 3 --models dlinear
 python src/train.py --epochs 3 --models lstm tcn
 ```
 
-Then run the extra analysis:
+Run analysis after training:
 
 ```bash
 python src/analyze_outputs.py --importance-model lstm
 ```
 
-Generated outputs:
+## Outputs used in the report
 
 ```text
 outputs/metrics.csv
-outputs/metrics.json
 outputs/figures/loss_curves.png
 outputs/figures/model_rmse_comparison.png
 outputs/figures/feature_importance_occlusion.png
@@ -98,22 +89,21 @@ outputs/checkpoints/tcn_best.pt
 outputs/checkpoints/dlinear_best.pt
 ```
 
-Use `outputs/metrics.csv` for the main results table and `outputs/figures/loss_curves.png` as the required training curve figure. Use `outputs/figures/model_rmse_comparison.png` and `outputs/figures/feature_importance_occlusion.png` as additional analysis figures.
+The checked-in outputs are from a short 3-epoch sanity run. For final report numbers, rerun the full command on RunPod and use the regenerated files.
 
-## Suggested Report Claim
+## Dataset
 
-The LSTM baseline models temporal degradation recursively through hidden states. The TCN variant uses dilated causal convolutions to capture temporal context with more parallel computation. The DLinear-style variant decomposes the sensor window into trend and residual components, then uses simple linear projections before a small regression head. The experiment tests whether convolutional temporal modeling or decomposition-based linear modeling can match or improve RUL prediction on FD001 while training efficiently.
+FD001 contains 100 training engine trajectories and 100 test trajectories. Each row has:
 
-## Citation Notes
+- unit id
+- cycle index
+- 3 operating settings
+- 21 sensor measurements
 
-Cite the NASA C-MAPSS dataset and the PHM 2008 paper referenced by NASA:
+The training trajectories run until failure. The test trajectories stop before failure, and the target RUL values are provided separately.
 
-Saxena, A., Goebel, K., Simon, D., and Eklund, N. "Damage Propagation Modeling for Aircraft Engine Run-to-Failure Simulation." Proceedings of the 1st International Conference on Prognostics and Health Management, 2008.
+## References
 
-For the TCN variant, cite:
-
-Bai, S., Kolter, J. Z., and Koltun, V. "An Empirical Evaluation of Generic Convolutional and Recurrent Networks for Sequence Modeling." 2018.
-
-For the DLinear-style variant, cite:
-
-Zeng, A., Chen, M., Zhang, L., and Xu, Q. "Are Transformers Effective for Time Series Forecasting?" Proceedings of the AAAI Conference on Artificial Intelligence, 2023.
+- Saxena, A., Goebel, K., Simon, D., and Eklund, N. "Damage Propagation Modeling for Aircraft Engine Run-to-Failure Simulation." PHM, 2008.
+- Bai, S., Kolter, J. Z., and Koltun, V. "An Empirical Evaluation of Generic Convolutional and Recurrent Networks for Sequence Modeling." 2018.
+- Zeng, A., Chen, M., Zhang, L., and Xu, Q. "Are Transformers Effective for Time Series Forecasting?" AAAI, 2023.
