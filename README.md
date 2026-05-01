@@ -8,6 +8,7 @@ This is a small 24-788 mini-project experiment for one student:
 - Variant 1: Temporal Convolutional Network (TCN)
 - Variant 2: DLinear-style decomposed linear time-series model
 - Metrics: RMSE and PHM asymmetric score
+- Extra analysis: parameter count, training time, model comparison plot, and sensor occlusion importance
 
 The official NASA page describes C-MAPSS as multivariate engine time series with train/test splits and true RUL labels for the test set. FD001 has 100 train trajectories, 100 test trajectories, one operating condition, and one fault mode.
 
@@ -20,6 +21,7 @@ cmapss_rul_project/
   src/data.py               # parsing, scaling, windowing
   src/models.py             # LSTM, TCN, and DLinear-style models
   src/train.py              # training, evaluation, plots, checkpoints
+  src/analyze_outputs.py    # extra analysis plots for the report
   outputs/                  # generated metrics, figures, checkpoints
   requirements.txt
 ```
@@ -73,21 +75,30 @@ python src/train.py --epochs 3 --models dlinear
 python src/train.py --epochs 3 --models lstm tcn
 ```
 
+Then run the extra analysis:
+
+```bash
+python src/analyze_outputs.py --importance-model lstm
+```
+
 Generated outputs:
 
 ```text
 outputs/metrics.csv
 outputs/metrics.json
 outputs/figures/loss_curves.png
+outputs/figures/model_rmse_comparison.png
+outputs/figures/feature_importance_occlusion.png
 outputs/figures/lstm_test_predictions.png
 outputs/figures/tcn_test_predictions.png
 outputs/figures/dlinear_test_predictions.png
+outputs/feature_importance_occlusion.csv
 outputs/checkpoints/lstm_best.pt
 outputs/checkpoints/tcn_best.pt
 outputs/checkpoints/dlinear_best.pt
 ```
 
-Use `outputs/metrics.csv` for the main results table and `outputs/figures/loss_curves.png` as the required training curve figure.
+Use `outputs/metrics.csv` for the main results table and `outputs/figures/loss_curves.png` as the required training curve figure. Use `outputs/figures/model_rmse_comparison.png` and `outputs/figures/feature_importance_occlusion.png` as additional analysis figures.
 
 ## Suggested Report Claim
 

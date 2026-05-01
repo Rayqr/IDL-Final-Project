@@ -4,6 +4,7 @@ import argparse
 import csv
 import json
 import random
+import time
 from pathlib import Path
 
 import matplotlib
@@ -43,6 +44,10 @@ def phm_score(y_true: np.ndarray, y_pred: np.ndarray) -> float:
     diff = y_pred - y_true
     scores = np.where(diff < 0, np.exp(-diff / 13.0) - 1.0, np.exp(diff / 10.0) - 1.0)
     return float(np.sum(scores))
+
+
+def count_parameters(model: nn.Module) -> int:
+    return sum(p.numel() for p in model.parameters() if p.requires_grad)
 
 
 def run_epoch(model, loader, criterion, optimizer, device) -> float:
@@ -122,6 +127,7 @@ def train_one_model(name: str, datasets, args, device: torch.device):
     test_loader = DataLoader(datasets.test_dataset, batch_size=args.batch_size, shuffle=False)
 
     model = build_model(name, datasets.feature_dim, args.window_size).to(device)
+    num_parameters = count_parameters(model)
     optimizer = torch.optim.Adam(model.parameters(), lr=args.lr, weight_decay=args.weight_decay)
     criterion = nn.MSELoss()
 
@@ -129,6 +135,7 @@ def train_one_model(name: str, datasets, args, device: torch.device):
     best_val = float("inf")
     ckpt_path = args.output_dir / "checkpoints" / f"{name}_best.pt"
 
+    start_time = time.perf_counter()
     for epoch in range(1, args.epochs + 1):
         train_loss = run_epoch(model, train_loader, criterion, optimizer, device)
         val_loss, y_val, p_val = evaluate(model, val_loader, criterion, device)
@@ -147,13 +154,19 @@ def train_one_model(name: str, datasets, args, device: torch.device):
                 },
                 ckpt_path,
             )
-        print(f"{name} epoch {epoch:03d}: train_loss={train_loss:.3f} val_rmse={val_rmse:.3f}")
+        print(
+            f"{name} epoch {epoch:03d}: "
+            f"train_loss={train_loss:.3f} val_rmse={val_rmse:.3f}"
+        )
+    train_time_sec = time.perf_counter() - start_time
 
     checkpoint = torch.load(ckpt_path, map_location=device)
     model.load_state_dict(checkpoint["model_state"])
     test_loss, y_test, p_test = evaluate(model, test_loader, criterion, device)
     metrics = {
         "model": name,
+        "parameters": num_parameters,
+        "train_time_sec": train_time_sec,
         "best_val_rmse": best_val,
         "test_mse": test_loss,
         "test_rmse": rmse(y_test, p_test),
