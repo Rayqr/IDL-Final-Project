@@ -97,8 +97,6 @@ figures/model_rmse_comparison.png
 figures/feature_importance_occlusion.png
 ```
 
-The `metrics.csv` files keep the values I used in the report: parameter count, training time, validation RMSE, test RMSE, PHM score, and subset name. I removed the duplicate JSON metrics and the old short-run output folder to keep this repo easier to read.
-
 ## Dataset
 
 C-MAPSS has four subsets:
