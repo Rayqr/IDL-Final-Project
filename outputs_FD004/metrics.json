@@ -1,0 +1,32 @@
+[
+  {
+    "model": "lstm",
+    "parameters": 25281,
+    "train_time_sec": 50.4292057948187,
+    "best_val_rmse": 16.01596450805664,
+    "test_mse": 296.0139617919922,
+    "test_rmse": 17.189346313476562,
+    "test_phm_score": 1397.7222900390625,
+    "subset": "FD004"
+  },
+  {
+    "model": "tcn",
+    "parameters": 35361,
+    "train_time_sec": 96.57451229682192,
+    "best_val_rmse": 17.023963928222656,
+    "test_mse": 394.38531494140625,
+    "test_rmse": 19.873950958251953,
+    "test_phm_score": 2985.156005859375,
+    "subset": "FD004"
+  },
+  {
+    "model": "dlinear",
+    "parameters": 943,
+    "train_time_sec": 32.52815603883937,
+    "best_val_rmse": 21.058225631713867,
+    "test_mse": 638.5216064453125,
+    "test_rmse": 25.311962127685547,
+    "test_phm_score": 6609.677734375,
+    "subset": "FD004"
+  }
+]
