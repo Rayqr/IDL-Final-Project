@@ -107,25 +107,29 @@ Run analysis after training:
 python src/analyze_outputs.py --fd FD001 --importance-model lstm
 ```
 
-## Outputs used in the report
+## Output folders
+
+`outputs/` is just my quick FD001 test run, so I did not use it for the final numbers.
+
+The actual RunPod results are in:
 
 ```text
-outputs/metrics.csv
-outputs/figures/loss_curves.png
-outputs/figures/model_rmse_comparison.png
-outputs/figures/feature_importance_occlusion.png
-outputs/figures/lstm_test_predictions.png
-outputs/figures/tcn_test_predictions.png
-outputs/figures/dlinear_test_predictions.png
-outputs/feature_importance_occlusion.csv
-outputs/checkpoints/lstm_best.pt
-outputs/checkpoints/tcn_best.pt
-outputs/checkpoints/dlinear_best.pt
+outputs_FD001/
+outputs_FD002/
+outputs_FD003/
+outputs_FD004/
 ```
 
-The `outputs/` folder is from a short FD001 sanity run. The `outputs_FD001/` through `outputs_FD004/` folders contain the full C-MAPSS run from RunPod. For the report, use the `outputs_FD00*/metrics.csv` files and the figures inside each corresponding `outputs_FD00*/figures/` folder.
+For each subset, I mainly used:
 
-I am keeping the full output folders in the repo so the reported figures and metrics can be checked without rerunning training.
+```text
+metrics.csv
+figures/loss_curves.png
+figures/model_rmse_comparison.png
+figures/feature_importance_occlusion.png
+```
+
+I left the checkpoints and prediction plots in the same folders too, mostly so I could double-check results later without rerunning the full experiment.
 
 ## Dataset
 
