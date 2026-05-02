@@ -1,4 +1,4 @@
-# Results Notes
+# Experiment Results
 
 I ran all four C-MAPSS subsets on RunPod using:
 

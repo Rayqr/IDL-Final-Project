@@ -27,27 +27,18 @@ These are the test RMSE numbers from the RunPod run with 30 epochs:
 | FD003 | 13.27 | 15.30 | 16.02 |
 | FD004 | 17.19 | 19.87 | 25.31 |
 
-The full metrics, including PHM score, parameter count, and training time, are in `outputs_FD001/metrics.csv` through `outputs_FD004/metrics.csv`.
+The full metrics, including PHM score, parameter count, and training time, are in `outputs_FD001/metrics.csv` through `outputs_FD004/metrics.csv`. Overall, the LSTM was the most stable across the harder subsets, while the TCN was best on FD001. The DLinear-style model was much smaller and faster, but it lost accuracy on every subset.
 
-## Repo layout
+## Files
 
-```text
-data/raw/                  # C-MAPSS data files
-src/data.py                # reading files, RUL labels, scaling, sliding windows
-src/models.py              # LSTM, TCN, DLinear-style models
-src/train.py               # training and evaluation
-src/analyze_outputs.py     # model comparison plot and feature occlusion analysis
-scripts/download_data.py   # downloads/unzips C-MAPSS if needed
-scripts/run_full_experiment.sh      # FD001
-scripts/run_all_fd_experiment.sh    # FD001-FD004
-outputs/                   # metrics, figures, and checkpoints
-RESULTS.md
-final_report.tex
-references.bib
-requirements.txt
-```
+The main training code is in `src/train.py`, and the three model definitions are in `src/models.py`. Data loading and sliding-window preprocessing are in `src/data.py`. I used `src/analyze_outputs.py` after training to make the RMSE comparison plots and feature occlusion analysis.
 
-`final_report.tex` is the Overleaf/LaTeX report draft. Before submitting, replace the name, department, and Andrew email in the author block.
+For reproducing the experiments, I used:
+
+- `scripts/run_full_experiment.sh` for FD001 only
+- `scripts/run_all_fd_experiment.sh` for FD001-FD004
+
+The report source is in `final_report.tex`, with citations in `references.bib`. A shorter result summary is in `RESULTS.md`.
 
 ## Run on RunPod
 
@@ -84,27 +75,6 @@ If I only want to test that the code works:
 ```bash
 python src/train.py --epochs 3
 python src/analyze_outputs.py --importance-model lstm
-```
-
-## Main commands
-
-Train all models:
-
-```bash
-python src/train.py --fd FD001 --epochs 30 --window-size 30 --batch-size 128
-```
-
-Train only one or two models while debugging:
-
-```bash
-python src/train.py --epochs 3 --models dlinear
-python src/train.py --epochs 3 --models lstm tcn
-```
-
-Run analysis after training:
-
-```bash
-python src/analyze_outputs.py --fd FD001 --importance-model lstm
 ```
 
 ## Output folders
