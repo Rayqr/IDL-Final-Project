@@ -27,7 +27,7 @@ These are the test RMSE numbers from the RunPod run with 30 epochs:
 | FD003 | 13.27 | 15.30 | 16.02 |
 | FD004 | 17.19 | 19.87 | 25.31 |
 
-The full metrics, including PHM score, parameter count, and training time, are in `outputs_FD001/metrics.csv` through `outputs_FD004/metrics.csv`. Overall, the LSTM was the most stable across the harder subsets, while the TCN was best on FD001. The DLinear-style model was much smaller and faster, but it lost accuracy on every subset.
+The full metrics, including PHM score, parameter count, and training time, are in `outputs/FD001/metrics.csv` through `outputs/FD004/metrics.csv`. Overall, the LSTM was the most stable across the harder subsets, while the TCN was best on FD001. The DLinear-style model was much smaller and faster, but it lost accuracy on every subset.
 
 ## Files
 
@@ -64,10 +64,10 @@ bash scripts/run_all_fd_experiment.sh
 This writes separate folders:
 
 ```text
-outputs_FD001/
-outputs_FD002/
-outputs_FD003/
-outputs_FD004/
+outputs/FD001/
+outputs/FD002/
+outputs/FD003/
+outputs/FD004/
 ```
 
 If I only want to test that the code works:
@@ -79,15 +79,13 @@ python src/analyze_outputs.py --importance-model lstm
 
 ## Output folders
 
-`outputs/` is just my quick FD001 test run, so I did not use it for the final numbers.
-
-The actual RunPod results are in:
+The final RunPod results are organized by subset:
 
 ```text
-outputs_FD001/
-outputs_FD002/
-outputs_FD003/
-outputs_FD004/
+outputs/FD001/
+outputs/FD002/
+outputs/FD003/
+outputs/FD004/
 ```
 
 For each subset, I mainly used:
@@ -99,7 +97,7 @@ figures/model_rmse_comparison.png
 figures/feature_importance_occlusion.png
 ```
 
-I left the checkpoints and prediction plots in the same folders too, mostly so I could double-check results later without rerunning the full experiment.
+The `metrics.csv` files keep the values I used in the report: parameter count, training time, validation RMSE, test RMSE, PHM score, and subset name. I removed the duplicate JSON metrics and the old short-run output folder to keep this repo easier to read.
 
 ## Dataset
 

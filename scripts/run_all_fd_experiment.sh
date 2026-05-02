@@ -10,10 +10,10 @@ for fd in FD001 FD002 FD003 FD004; do
     --epochs 30 \
     --window-size 30 \
     --batch-size 128 \
-    --output-dir "outputs_${fd}"
+    --output-dir "outputs/${fd}"
 
   MPLCONFIGDIR=.mplcache python src/analyze_outputs.py \
     --fd "${fd}" \
-    --output-dir "outputs_${fd}" \
+    --output-dir "outputs/${fd}" \
     --importance-model lstm
 done

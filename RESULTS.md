@@ -28,9 +28,9 @@ Lower is better.
 
 ## Output files
 
-- `outputs_FD001/metrics.csv`
-- `outputs_FD002/metrics.csv`
-- `outputs_FD003/metrics.csv`
-- `outputs_FD004/metrics.csv`
+- `outputs/FD001/metrics.csv`
+- `outputs/FD002/metrics.csv`
+- `outputs/FD003/metrics.csv`
+- `outputs/FD004/metrics.csv`
 
 Each output folder also includes loss curves, prediction plots, checkpoints, and the sensor occlusion analysis figure.

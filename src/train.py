@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import argparse
 import csv
-import json
 import random
 import time
 from pathlib import Path
@@ -162,13 +161,12 @@ def train_one_model(name: str, datasets, args, device: torch.device):
 
     checkpoint = torch.load(ckpt_path, map_location=device)
     model.load_state_dict(checkpoint["model_state"])
-    test_loss, y_test, p_test = evaluate(model, test_loader, criterion, device)
+    _, y_test, p_test = evaluate(model, test_loader, criterion, device)
     metrics = {
         "model": name,
         "parameters": num_parameters,
         "train_time_sec": train_time_sec,
         "best_val_rmse": best_val,
-        "test_mse": test_loss,
         "test_rmse": rmse(y_test, p_test),
         "test_phm_score": phm_score(y_test, p_test),
     }
@@ -222,9 +220,6 @@ def main() -> None:
         writer = csv.DictWriter(f, fieldnames=list(metrics[0].keys()))
         writer.writeheader()
         writer.writerows(metrics)
-
-    with (args.output_dir / "metrics.json").open("w") as f:
-        json.dump(metrics, f, indent=2)
 
     print("\nFinal test metrics")
     for row in metrics:
