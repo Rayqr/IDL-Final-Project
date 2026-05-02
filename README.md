@@ -1,4 +1,4 @@
-# IDL Final Project: C-MAPSS RUL Prediction
+# IDL Final Project
 
 This repo is for my 24-788 Introduction to Deep Learning mini-project. I use the NASA C-MAPSS turbofan engine degradation dataset. I start with FD001 as suggested in the project handout, and the code can also run FD001-FD004 for the full C-MAPSS comparison.
 
@@ -16,6 +16,19 @@ Main metric: RMSE on the FD001 test set. I also report the PHM asymmetric score,
 
 I also included a simple sensor occlusion analysis to see which sensor channels matter most for the trained LSTM.
 
+## Current results
+
+These are the test RMSE numbers from the RunPod run with 30 epochs:
+
+| Subset | LSTM | TCN | DLinear-style |
+|---|---:|---:|---:|
+| FD001 | 15.78 | 14.73 | 21.76 |
+| FD002 | 15.41 | 16.05 | 20.21 |
+| FD003 | 13.27 | 15.30 | 16.02 |
+| FD004 | 17.19 | 19.87 | 25.31 |
+
+The full metrics, including PHM score, parameter count, and training time, are in `outputs_FD001/metrics.csv` through `outputs_FD004/metrics.csv`.
+
 ## Repo layout
 
 ```text
@@ -28,6 +41,7 @@ scripts/download_data.py   # downloads/unzips C-MAPSS if needed
 scripts/run_full_experiment.sh      # FD001
 scripts/run_all_fd_experiment.sh    # FD001-FD004
 outputs/                   # metrics, figures, and checkpoints
+RESULTS.md
 requirements.txt
 ```
 
@@ -106,6 +120,8 @@ outputs/checkpoints/dlinear_best.pt
 ```
 
 The `outputs/` folder is from a short FD001 sanity run. The `outputs_FD001/` through `outputs_FD004/` folders contain the full C-MAPSS run from RunPod. For the report, use the `outputs_FD00*/metrics.csv` files and the figures inside each corresponding `outputs_FD00*/figures/` folder.
+
+I am keeping the full output folders in the repo so the reported figures and metrics can be checked without rerunning training.
 
 ## Dataset
 
