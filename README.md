@@ -33,12 +33,11 @@ The full metrics, including PHM score, parameter count, and training time, are i
 
 The main training code is in `src/train.py`, and the three model definitions are in `src/models.py`. Data loading and sliding-window preprocessing are in `src/data.py`. I used `src/analyze_outputs.py` after training to make the RMSE comparison plots and feature occlusion analysis.
 
-For reproducing the experiments, I used:
+For the experiments, I used:
 
-- `scripts/run_full_experiment.sh` for FD001 only
 - `scripts/run_all_fd_experiment.sh` for FD001-FD004
 
-The report source is in `final_report.tex`, with citations in `references.bib`. A shorter result summary is in `RESULTS.md`.
+The report source is in `final_report.tex`, with citations in `references.bib`.
 
 ## Run on RunPod
 
@@ -59,22 +58,6 @@ To run all four C-MAPSS subsets:
 
 ```bash
 bash scripts/run_all_fd_experiment.sh
-```
-
-This writes separate folders:
-
-```text
-outputs/FD001/
-outputs/FD002/
-outputs/FD003/
-outputs/FD004/
-```
-
-If I only want to test that the code works:
-
-```bash
-python src/train.py --epochs 3
-python src/analyze_outputs.py --importance-model lstm
 ```
 
 ## Output folders
