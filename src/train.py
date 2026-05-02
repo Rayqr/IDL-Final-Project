@@ -16,7 +16,7 @@ import torch
 from torch import nn
 from torch.utils.data import DataLoader
 
-from data import load_fd001
+from data import load_cmapss_subset
 from models import DLinearRegressor, LSTMRegressor, TCNRegressor
 
 
@@ -92,14 +92,14 @@ def build_model(name: str, input_dim: int, window_size: int) -> nn.Module:
     raise ValueError(f"Unknown model: {name}")
 
 
-def plot_loss(histories: dict[str, dict[str, list[float]]], out_path: Path) -> None:
+def plot_loss(histories: dict[str, dict[str, list[float]]], out_path: Path, subset: str) -> None:
     plt.figure(figsize=(8, 5))
     for name, history in histories.items():
         plt.plot(history["train_loss"], label=f"{name} train")
         plt.plot(history["val_loss"], label=f"{name} val")
     plt.xlabel("Epoch")
     plt.ylabel("MSE loss")
-    plt.title("FD001 training and validation loss")
+    plt.title(f"{subset} training and validation loss")
     plt.legend()
     plt.tight_layout()
     plt.savefig(out_path, dpi=200)
@@ -178,9 +178,10 @@ def train_one_model(name: str, datasets, args, device: torch.device):
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description="Train LSTM baseline and variants on NASA C-MAPSS FD001.")
+    parser = argparse.ArgumentParser(description="Train LSTM baseline and variants on NASA C-MAPSS.")
     parser.add_argument("--data-dir", type=Path, default=Path("data/raw"))
     parser.add_argument("--output-dir", type=Path, default=Path("outputs"))
+    parser.add_argument("--fd", default="FD001", choices=["FD001", "FD002", "FD003", "FD004"])
     parser.add_argument("--epochs", type=int, default=20)
     parser.add_argument("--batch-size", type=int, default=128)
     parser.add_argument("--window-size", type=int, default=30)
@@ -203,16 +204,18 @@ def main() -> None:
 
     device = get_device()
     print(f"Using device: {device}")
-    datasets = load_fd001(args.data_dir, window_size=args.window_size, seed=args.seed)
+    print(f"Running subset: {args.fd}")
+    datasets = load_cmapss_subset(args.data_dir, subset=args.fd, window_size=args.window_size, seed=args.seed)
 
     histories = {}
     metrics = []
     for name in args.models:
         history, model_metrics = train_one_model(name, datasets, args, device)
         histories[name] = history
+        model_metrics["subset"] = args.fd
         metrics.append(model_metrics)
 
-    plot_loss(histories, args.output_dir / "figures" / "loss_curves.png")
+    plot_loss(histories, args.output_dir / "figures" / "loss_curves.png", args.fd)
 
     metrics_csv = args.output_dir / "metrics.csv"
     with metrics_csv.open("w", newline="") as f:

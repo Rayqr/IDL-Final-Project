@@ -14,7 +14,7 @@ import torch
 from torch import nn
 from torch.utils.data import DataLoader
 
-from data import FEATURE_COLUMNS, load_fd001
+from data import FEATURE_COLUMNS, load_cmapss_subset
 from train import build_model, get_device, rmse
 
 
@@ -28,12 +28,12 @@ def predict(model: nn.Module, sequences: torch.Tensor, device: torch.device) -> 
     return np.concatenate(preds).reshape(-1)
 
 
-def plot_metric_bars(metrics: pd.DataFrame, out_path: Path) -> None:
+def plot_metric_bars(metrics: pd.DataFrame, out_path: Path, subset: str) -> None:
     ordered = metrics.sort_values("test_rmse")
     plt.figure(figsize=(7, 4.5))
     bars = plt.bar(ordered["model"], ordered["test_rmse"], color=["#4C78A8", "#F58518", "#54A24B"])
     plt.ylabel("Test RMSE")
-    plt.title("FD001 model comparison")
+    plt.title(f"{subset} model comparison")
     for bar in bars:
         height = bar.get_height()
         plt.text(bar.get_x() + bar.get_width() / 2, height, f"{height:.2f}", ha="center", va="bottom")
@@ -42,9 +42,9 @@ def plot_metric_bars(metrics: pd.DataFrame, out_path: Path) -> None:
     plt.close()
 
 
-def run_feature_occlusion(model_name: str, data_dir: Path, output_dir: Path, window_size: int) -> None:
+def run_feature_occlusion(model_name: str, data_dir: Path, output_dir: Path, window_size: int, subset: str) -> None:
     device = get_device()
-    datasets = load_fd001(data_dir, window_size=window_size)
+    datasets = load_cmapss_subset(data_dir, subset=subset, window_size=window_size)
     checkpoint_path = output_dir / "checkpoints" / f"{model_name}_best.pt"
     if not checkpoint_path.exists():
         raise FileNotFoundError(f"Missing checkpoint: {checkpoint_path}")
@@ -95,6 +95,7 @@ def main() -> None:
     parser = argparse.ArgumentParser(description="Create model comparison and feature-importance analysis plots.")
     parser.add_argument("--data-dir", type=Path, default=Path("data/raw"))
     parser.add_argument("--output-dir", type=Path, default=Path("outputs"))
+    parser.add_argument("--fd", default="FD001", choices=["FD001", "FD002", "FD003", "FD004"])
     parser.add_argument("--window-size", type=int, default=30)
     parser.add_argument("--importance-model", default="lstm", choices=["lstm", "tcn", "dlinear"])
     args = parser.parse_args()
@@ -103,8 +104,8 @@ def main() -> None:
     (args.output_dir / "figures").mkdir(parents=True, exist_ok=True)
 
     metrics = pd.read_csv(args.output_dir / "metrics.csv")
-    plot_metric_bars(metrics, args.output_dir / "figures" / "model_rmse_comparison.png")
-    run_feature_occlusion(args.importance_model, args.data_dir, args.output_dir, args.window_size)
+    plot_metric_bars(metrics, args.output_dir / "figures" / "model_rmse_comparison.png", args.fd)
+    run_feature_occlusion(args.importance_model, args.data_dir, args.output_dir, args.window_size, args.fd)
     print(f"Saved analysis outputs under {args.output_dir}")
 
 

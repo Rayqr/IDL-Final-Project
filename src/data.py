@@ -102,17 +102,19 @@ def make_last_windows_for_test(
     return np.stack(sequences), np.array(targets, dtype=np.float32)
 
 
-def load_fd001(
+def load_cmapss_subset(
     data_dir: str | Path,
+    subset: str = "FD001",
     window_size: int = 30,
     val_fraction: float = 0.2,
     seed: int = 7,
     max_rul: int = MAX_RUL,
 ) -> CmapssData:
     data_dir = Path(data_dir)
-    train_path = data_dir / "train_FD001.txt"
-    test_path = data_dir / "test_FD001.txt"
-    rul_path = data_dir / "RUL_FD001.txt"
+    subset = subset.upper()
+    train_path = data_dir / f"train_{subset}.txt"
+    test_path = data_dir / f"test_{subset}.txt"
+    rul_path = data_dir / f"RUL_{subset}.txt"
     missing = [str(p) for p in [train_path, test_path, rul_path] if not p.exists()]
     if missing:
         raise FileNotFoundError(
@@ -140,4 +142,21 @@ def load_fd001(
         test_dataset=SequenceDataset(x_test, y_test),
         feature_dim=len(FEATURE_COLUMNS),
         scaler=scaler,
+    )
+
+
+def load_fd001(
+    data_dir: str | Path,
+    window_size: int = 30,
+    val_fraction: float = 0.2,
+    seed: int = 7,
+    max_rul: int = MAX_RUL,
+) -> CmapssData:
+    return load_cmapss_subset(
+        data_dir=data_dir,
+        subset="FD001",
+        window_size=window_size,
+        val_fraction=val_fraction,
+        seed=seed,
+        max_rul=max_rul,
     )
