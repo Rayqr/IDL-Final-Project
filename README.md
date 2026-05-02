@@ -42,8 +42,12 @@ scripts/run_full_experiment.sh      # FD001
 scripts/run_all_fd_experiment.sh    # FD001-FD004
 outputs/                   # metrics, figures, and checkpoints
 RESULTS.md
+final_report.tex
+references.bib
 requirements.txt
 ```
+
+`final_report.tex` is the Overleaf/LaTeX report draft. Before submitting, replace the name, department, and Andrew email in the author block.
 
 ## Run on RunPod
 
