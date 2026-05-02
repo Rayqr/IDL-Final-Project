@@ -105,7 +105,7 @@ outputs/checkpoints/tcn_best.pt
 outputs/checkpoints/dlinear_best.pt
 ```
 
-The checked-in outputs are from a short 3-epoch FD001 sanity run. For final report numbers, rerun the full command on RunPod and use the regenerated files. If using the full C-MAPSS setting, use `scripts/run_all_fd_experiment.sh` and report results from the `outputs_FD00*/metrics.csv` files.
+The `outputs/` folder is from a short FD001 sanity run. The `outputs_FD001/` through `outputs_FD004/` folders contain the full C-MAPSS run from RunPod. For the report, use the `outputs_FD00*/metrics.csv` files and the figures inside each corresponding `outputs_FD00*/figures/` folder.
 
 ## Dataset
 
